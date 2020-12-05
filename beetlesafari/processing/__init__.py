@@ -1,1 +1,2 @@
-from ._delayed_operation import delayed_operation
+from ._delayed_operation import delayed_unary_operation
+from ._delayed_operation import delayed_binary_operation
