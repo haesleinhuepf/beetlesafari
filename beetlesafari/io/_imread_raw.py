@@ -17,8 +17,12 @@ def imread_raw(filename : str, width : int = 1, height : int = 1, depth : int = 
         numpy array with given dimensions containing pixels from specified file
     """
 
+    import time
+    start_time = time.time()
     f = open(filename, 'rb')  # only opens the file for reading
     img_arr = np.fromfile(f, dtype=dtype)
     img_arr = img_arr.reshape(depth, height, width)
     f.close()
+
+    print("imread_raw took " + str(time.time() - start_time))
     return img_arr
