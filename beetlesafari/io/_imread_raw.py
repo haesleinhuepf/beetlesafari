@@ -26,5 +26,5 @@ def imread_raw(filename : str, width : int = 1, height : int = 1, depth : int = 
     img_arr = img_arr.reshape(depth, height, width)
     f.close()
 
-    print("imread_raw took " + str(time.time() - start_time))
+    print("------------------------\nimread_raw took " + str(time.time() - start_time))
     return img_arr

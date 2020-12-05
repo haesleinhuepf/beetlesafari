@@ -2,12 +2,13 @@ foldername = 'C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR/s
 width = 512
 height = 1024
 depth = 71
-voxel_size = [3, 0.6934, 0.6934]
+voxel_size = [1, 3, 0.6934, 0.6934]
 
 import beetlesafari as bs
 from functools import lru_cache
 
-img_arr = bs.imread_raw_folder(foldername + "/000*00.raw", width, height, depth)
+#
+img_arr = bs.imread_raw_folder(foldername  + "/000*0.raw", width, height, depth)
 
 import pyclesperanto_prototype as cle
 print(cle.cl_info())
@@ -104,7 +105,7 @@ delayed_cells_segmented = bs.delayed_operation(cell_segmentation, source=delayed
 import napari
 with napari.gui_qt():
     viewer = napari.Viewer()
-    viewer.add_image(bs.delayed_pull(delayed_pushed), name='Tribolium', contrast_limits=[0, 1000], scale=voxel_size)
+    viewer.add_image(img_arr, name='Tribolium', contrast_limits=[0, 1000], scale=voxel_size)
 
 
     #bs.delayed_operation(background_subtraction, {'input':gpu_input, 'output':gpu_background_subtracted})
@@ -113,4 +114,4 @@ with napari.gui_qt():
 
     viewer.add_image(bs.delayed_pull(delayed_spot_detected), name = "Detected spots", contrast_limits=[0, 1], scale=voxel_size)
 
-    viewer.add_labels(bs.delayed_pull(delayed_cells_segmented), name = "Segmented cells", scale=voxel_size)
+    viewer.add_labels(bs.delayed_pull(delayed_cells_segmented), name = "Segmented cells", scale=voxel_size, multiscale=False)
