@@ -6,7 +6,7 @@ from pyclesperanto_prototype._tier0._pycl import OCLArray
 def _pull(target : cle.Image):
     import time
     start_time = time.time()
-    result = cle.pull_zyx(target)
+    result = cle.pull_zyx(cle.maximum_z_projection(target))
     print("pull took " + str(time.time() - start_time))
 
     return result
@@ -19,7 +19,7 @@ def delayed_pull(target):
     lazy_process_image = dask.delayed(_pull)  # lazy reader
     lazy_arrays = [lazy_process_image(target[n]) for n in range(0, target.shape[0])]
     dask_arrays = [
-        da.from_delayed(lazy_array, shape=target.shape[1:], dtype=target.dtype)
+        da.from_delayed(lazy_array, shape=target.shape[2:], dtype=target.dtype)
         for lazy_array in lazy_arrays
     ]
 

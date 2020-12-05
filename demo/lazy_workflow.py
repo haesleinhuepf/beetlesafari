@@ -143,7 +143,7 @@ delayed_mesh = bs.delayed_binary_operation(draw_mesh, delayed_spot_detected, del
 # Start up napari
 import napari
 with napari.gui_qt():
-    viewer = napari.Viewer(ndisplay=3, order=[0,2,1], title='napari on beetle safari')
+    viewer = napari.Viewer()# @ndisplay=3, order=[0,2,1], title='napari on beetle safari')
 
 
     viewer.add_image(bs.delayed_pull(delayed_pushed), name='Tribolium', contrast_limits=[0, 1000], scale=voxel_size, blending='additive', visible=False)
