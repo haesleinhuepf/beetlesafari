@@ -14,7 +14,7 @@ setuptools.setup(
     url="https://github.com/haesleinhuepf/beetlesafari",
     packages=setuptools.find_packages(),
     include_package_data=True,
-    install_requires=["numpy", "pyopencl", "toolz", "scikit-image", "requests", "pyclesperanto-prototype", "napari", "dask"],
+    install_requires=["numpy", "pyopencl", "toolz", "scikit-image", "requests", "pyclesperanto-prototype", "napari", "dask", "cachetools"],
     python_requires='>=3.7',
     classifiers=[
         "Programming Language :: Python :: 3",

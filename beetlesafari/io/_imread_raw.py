@@ -1,6 +1,8 @@
 # thanks to max9111, https://stackoverflow.com/questions/41651998/python-read-and-convert-raw-3d-image-file
 import numpy as np
+from functools import lru_cache
 
+@lru_cache(maxsize=2)
 def imread_raw(filename : str, width : int = 1, height : int = 1, depth : int = 1, dtype = np.uint16):
     """Loads a raw image file (3D) with given dimensions from disk
 

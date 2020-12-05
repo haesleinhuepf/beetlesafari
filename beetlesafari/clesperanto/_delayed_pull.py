@@ -4,11 +4,10 @@ from pyclesperanto_prototype._tier0._pycl import OCLArray
 
 
 def _pull(target : cle.Image):
-    print("pull")
     import time
     start_time = time.time()
     result = cle.pull_zyx(target)
-    print("push_copy took " + str(time.time() - start_time))
+    print("pull took " + str(time.time() - start_time))
 
     return result
 
