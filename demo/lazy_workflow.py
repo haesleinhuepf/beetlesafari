@@ -3,6 +3,8 @@ width = 512
 height = 1024
 depth = 71
 voxel_size = [3, 0.6934, 0.6934]
+zoom = 1.0
+scaling_factor = [voxel_size[0] * zoom, voxel_size[1] * zoom, voxel_size[2] * zoom]
 
 import beetlesafari as bs
 from functools import lru_cache
@@ -26,7 +28,7 @@ def background_subtraction(input : cle.Image, output : cle.Image):
     import time
     start_time = time.time()
     #cle.top_hat_sphere(input, output, radius_x, radius_y, radius_z)
-    cle.difference_of_gaussian(input, output, 2, 2, 1, 6, 6, 2)
+    cle.difference_of_gaussian(input, output, 1, 1, 1, 5, 5, 5)
     print("subtract background took " + str(time.time() - start_time))
     return output
 
@@ -54,10 +56,13 @@ def spot_detection(input : cle.Image, output : cle.Image, threshold : float = 50
 
     cle.label_spots(spot_detection.temp_flip, output)
 
+    number_of_spots = cle.maximum_of_all_pixels(output)
+    print("Num spots: " + str(number_of_spots))
+
     print("spot detection took " + str(time.time() - start_time))
     return output
 
-def cell_segmentation(input : cle.Image, output : cle.Image, number_of_dilations : int = 18, number_of_erosions : int = 12):
+def cell_segmentation(input : cle.Image, output : cle.Image, number_of_dilations : int = 10, number_of_erosions : int = 6):
     import time
     start_time = time.time()
 
@@ -113,16 +118,18 @@ def draw_mesh(spots : cle.Image, cells : cle.Image, mesh : cle.Image):
 
 # push a first image to get something on the GPU to work with
 gpu_input = cle.push_zyx(img_arr[0])
+resampled = cle.resample(gpu_input, factor_x = scaling_factor[2], factor_y = scaling_factor[1], factor_z = scaling_factor[0])
+
 
 # allocate memory for subsequent steps
-gpu_background_subtracted = cle.create(gpu_input)
-gpu_spot_detection = cle.create(gpu_input)
-gpu_cell_segmentation = cle.create(gpu_input)
-gpu_membranes = cle.create(gpu_input)
-gpu_mesh = cle.create(gpu_input)
+gpu_background_subtracted = cle.create(resampled)
+gpu_spot_detection = cle.create(resampled)
+gpu_cell_segmentation = cle.create(resampled)
+gpu_membranes = cle.create(resampled)
+gpu_mesh = cle.create(resampled)
 
 # on demand, push a nother time point
-delayed_pushed = bs.delayed_push(img_arr, gpu_input)
+delayed_pushed = bs.delayed_push(img_arr, resampled, zoom = scaling_factor)
 print(delayed_pushed)
 
 # on demand, process it
@@ -146,18 +153,18 @@ with napari.gui_qt():
     viewer = napari.Viewer(ndisplay=3, order=[0,2,1], title='napari on beetle safari')
 
 
-    viewer.add_image(bs.delayed_pull(delayed_pushed), name='Tribolium', contrast_limits=[0, 1000], scale=voxel_size, blending='additive', visible=False)
+    viewer.add_image(bs.delayed_pull(delayed_pushed), name='Tribolium', contrast_limits=[0, 1000], blending='additive', visible=False)
 
     #bs.delayed_operation(background_subtraction, {'input':gpu_input, 'output':gpu_background_subtracted})
 
-    viewer.add_image(bs.delayed_pull(delayed_background_subtracted), name = "Background subtracted", contrast_limits=[0, 200], scale=voxel_size, blending='additive', colormap='magenta')
+    viewer.add_image(bs.delayed_pull(delayed_background_subtracted), name = "Background subtracted", contrast_limits=[0, 200], blending='additive', colormap='magenta')
 
-    viewer.add_image(bs.delayed_pull(delayed_spot_detected), name = "Detected spots", contrast_limits=[0, 1], scale=voxel_size, blending='additive', colormap='yellow')
+    viewer.add_image(bs.delayed_pull(delayed_spot_detected), name = "Detected spots", contrast_limits=[0, 1], blending='additive', colormap='yellow')
 
-    viewer.add_labels(bs.delayed_pull(delayed_cells_segmented), name = "Segmented cells", scale=voxel_size, visible=False)
+    viewer.add_labels(bs.delayed_pull(delayed_cells_segmented), name = "Segmented cells", visible=False)
 
-    viewer.add_image(bs.delayed_pull(delayed_membranes), name = "Estimated membranes", scale=voxel_size, visible=True, rendering='average', contrast_limits=[0, 0.1], blending='additive', colormap='cyan')
+    viewer.add_image(bs.delayed_pull(delayed_membranes), name = "Estimated membranes", visible=True, rendering='average', contrast_limits=[0, 0.1], blending='additive', colormap='cyan')
 
-    viewer.add_image(bs.delayed_pull(delayed_mesh), name = "Mesh", contrast_limits=[0, 50], scale=voxel_size, blending='additive', colormap='green')
+    viewer.add_image(bs.delayed_pull(delayed_mesh), name = "Mesh", contrast_limits=[0, 50], blending='additive', colormap='green')
 
     viewer.window.qt_viewer.camera.zoom = 1
