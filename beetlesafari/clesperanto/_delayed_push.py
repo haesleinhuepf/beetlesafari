@@ -12,10 +12,11 @@ def _push_copy(image : np.ndarray, target : cle.Image, timepoint : int, scale_fa
     import time
     start_time = time.time()
     pushed = cle.push_zyx(image)
+
     if (scale_factor is None):
-        cle.copy(pushed, target)
+        target = cle.copy(pushed, target)
     else:
-        cle.resample(pushed, target, factor_x=scale_factor[2], factor_y=scale_factor[1], factor_z=scale_factor[0])
+        target = cle.resample(pushed, target, factor_x=scale_factor[2], factor_y=scale_factor[1], factor_z=scale_factor[0])
 
     print("push took " + str(time.time() - start_time))
 

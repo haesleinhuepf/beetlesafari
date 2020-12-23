@@ -3,7 +3,7 @@ width = 512
 height = 1024
 depth = 71
 voxel_size = [3, 0.6934, 0.6934]
-zoom = 1.0
+zoom = 0.8
 scaling_factor = [voxel_size[0] * zoom, voxel_size[1] * zoom, voxel_size[2] * zoom]
 
 import beetlesafari as bs
@@ -19,102 +19,18 @@ import pyclesperanto_prototype as cle
 print(cle.cl_info())
 
 # select a good default device
-cle.select_device("RTX")
+cle.select_device("TX")
 
 # print out chosen device
 print(cle.get_device())
 
-def background_subtraction(input : cle.Image, output : cle.Image):
-    import time
-    start_time = time.time()
-    #cle.top_hat_sphere(input, output, radius_x, radius_y, radius_z)
-    cle.difference_of_gaussian(input, output, 1, 1, 1, 5, 5, 5)
-    print("subtract background took " + str(time.time() - start_time))
-    return output
 
-def spot_detection(input : cle.Image, output : cle.Image, threshold : float = 50.0):
-    import time
-    start_time = time.time()
 
-    # permanently allocate temporary images
-    if not hasattr(spot_detection, 'temp_flip'):
-        spot_detection.temp_flip = cle.create(input)
-    if not hasattr(spot_detection, 'temp_flop'):
-        spot_detection.temp_flop = cle.create(input)
 
-    # detect maxima
-    cle.detect_maxima_box(input, spot_detection.temp_flop)
 
-    # threshold
-    cle.greater_constant(input, output, constant=threshold)
 
-    # mask
-    cle.binary_and(output, spot_detection.temp_flop, spot_detection.temp_flip)
 
-    # label spots
-    # cle.connected_components_labeling_box(spot_detection.temp_flip, output)
 
-    cle.label_spots(spot_detection.temp_flip, output)
-
-    number_of_spots = cle.maximum_of_all_pixels(output)
-    print("Num spots: " + str(number_of_spots))
-
-    print("spot detection took " + str(time.time() - start_time))
-    return output
-
-def cell_segmentation(input : cle.Image, output : cle.Image, number_of_dilations : int = 10, number_of_erosions : int = 6):
-    import time
-    start_time = time.time()
-
-    # permanently allocate temporary images
-    if not hasattr(cell_segmentation, 'temp_flip'):
-        cell_segmentation.temp_flip = cle.create(input)
-    if not hasattr(cell_segmentation, 'temp_flop'):
-        cell_segmentation.temp_flop = cle.create(input)
-    if not hasattr(cell_segmentation, 'temp_flag'):
-        cell_segmentation.temp_flag = cle.create([1, 1, 1])
-
-    # extend labels until they touch
-    cle.copy(input, cell_segmentation.temp_flip)
-    for i in range(0, number_of_dilations):
-        cle.onlyzero_overwrite_maximum_box(cell_segmentation.temp_flip, cell_segmentation.temp_flag, cell_segmentation.temp_flop)
-        cle.onlyzero_overwrite_maximum_diamond(cell_segmentation.temp_flop, cell_segmentation.temp_flag, cell_segmentation.temp_flip)
-
-    # shrink labels a bit again
-    cle.greater_constant(cell_segmentation.temp_flip, output, constant=1)
-    for i in range(0, number_of_erosions):
-        cle.erode_box(output, cell_segmentation.temp_flop)
-        cle.erode_box(cell_segmentation.temp_flop, output)
-
-    # mask the extended labels with a mask made from the shrinked
-    cle.copy(output, cell_segmentation.temp_flop)
-    cle.mask(cell_segmentation.temp_flip, cell_segmentation.temp_flop, output)
-
-    print("cell segmentation took " + str(time.time() - start_time))
-    return output
-
-def membrane_estimation(cell_segmentation : cle.Image, membranes : cle.Image):
-    cle.detect_label_edges(cell_segmentation, membranes)
-    return membranes
-
-def draw_mesh(spots : cle.Image, cells : cle.Image, mesh : cle.Image):
-
-    gpu_pointlist = cle.labelled_spots_to_pointlist(spots)
-
-    gpu_distance_matrix = cle.generate_distance_matrix(gpu_pointlist, gpu_pointlist)
-
-    gpu_touch_matrix = cle.generate_touch_matrix(cells)
-
-    # touch matrix:
-    # set the first column to zero to ignore all spots touching the background (background label 0, first column)
-    cle.set_column(gpu_touch_matrix, 0, 0)
-
-    gpu_touch_matrix_with_distances = cle.multiply_images(gpu_touch_matrix, gpu_distance_matrix)
-
-    cle.set(mesh, 0)
-    cle.touch_matrix_to_mesh(gpu_pointlist, gpu_touch_matrix_with_distances, mesh)
-
-    return mesh
 
 # push a first image to get something on the GPU to work with
 gpu_input = cle.push_zyx(img_arr[0])
@@ -131,6 +47,8 @@ gpu_mesh = cle.create(resampled)
 # on demand, push a nother time point
 delayed_pushed = bs.delayed_push(img_arr, resampled, zoom = scaling_factor)
 print(delayed_pushed)
+
+from beetlesafari import background_subtraction, spot_detection, cell_segmentation, membrane_estimation, draw_mesh
 
 # on demand, process it
 delayed_background_subtracted = bs.delayed_unary_operation(background_subtraction, source=delayed_pushed, target=gpu_background_subtracted)
@@ -157,13 +75,13 @@ with napari.gui_qt():
 
     #bs.delayed_operation(background_subtraction, {'input':gpu_input, 'output':gpu_background_subtracted})
 
-    viewer.add_image(bs.delayed_pull(delayed_background_subtracted), name = "Background subtracted", contrast_limits=[0, 200], blending='additive', colormap='magenta')
+    viewer.add_image(bs.delayed_pull(delayed_background_subtracted), name = "Background subtracted", contrast_limits=[0, 400], blending='additive', colormap='magenta')
 
     viewer.add_image(bs.delayed_pull(delayed_spot_detected), name = "Detected spots", contrast_limits=[0, 1], blending='additive', colormap='yellow')
 
     viewer.add_labels(bs.delayed_pull(delayed_cells_segmented), name = "Segmented cells", visible=False)
 
-    viewer.add_image(bs.delayed_pull(delayed_membranes), name = "Estimated membranes", visible=True, rendering='average', contrast_limits=[0, 0.1], blending='additive', colormap='cyan')
+    viewer.add_image(bs.delayed_pull(delayed_membranes), name = "Estimated membranes", visible=True, rendering='average', contrast_limits=[0, 0.001], blending='additive', colormap='cyan')
 
     viewer.add_image(bs.delayed_pull(delayed_mesh), name = "Mesh", contrast_limits=[0, 50], blending='additive', colormap='green')
 
