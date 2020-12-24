@@ -1,3 +1,4 @@
 /.idea/
 /beetlesafari.egg-info/
 __pycache__
+*.ipynb
