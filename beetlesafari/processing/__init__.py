@@ -6,3 +6,10 @@ from ._draw_mesh import draw_mesh
 
 from ._delayed_operation import delayed_unary_operation
 from ._delayed_operation import delayed_binary_operation
+
+from ._segmentation import segmentation
+from ._neighbors import neighbors
+from ._neighbors import neighborize
+
+
+from ._distances import distances
