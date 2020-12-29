@@ -20,3 +20,36 @@ def neighbors(cells):
     #show(neighbors_of_neighbors_of_neighbors)
 
     return touch_matrix, neighbors_of_neighbors, neighbors_of_neighbors_of_neighbors
+
+def neighborize(raw_data, touch_matrix, neighbors_of_neighbors, neighbors_of_neighbors_of_neighbors):
+    import pyclesperanto_prototype as cle
+
+    neighborhoods = [touch_matrix, neighbors_of_neighbors, neighbors_of_neighbors_of_neighbors]
+
+    preproc_data = []
+
+    for element in raw_data:
+        # print(element[0].size)
+        preproc_data.append(element[0])
+
+        for neighborhood in neighborhoods:
+            median = cle.median_of_touching_neighbors(element, neighborhood)
+            preproc_data.append(median[0])
+
+            stddev = cle.standard_deviation_of_touching_neighbors(element, neighborhood)
+            preproc_data.append(stddev[0])
+
+            mean = cle.mean_of_touching_neighbors(element, neighborhood)
+            preproc_data.append(mean[0])
+
+            minimum = cle.minimum_of_touching_neighbors(element, neighborhood)
+            preproc_data.append(minimum[0])
+
+            maximum = cle.maximum_of_touching_neighbors(element, neighborhood)
+            preproc_data.append(maximum[0])
+    import numpy as np
+
+    data = np.asarray(preproc_data).T
+    print(data.shape)
+
+    return data

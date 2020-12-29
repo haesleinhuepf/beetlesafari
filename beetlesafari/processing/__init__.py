@@ -9,6 +9,7 @@ from ._delayed_operation import delayed_binary_operation
 
 from ._segmentation import segmentation
 from ._neighbors import neighbors
+from ._neighbors import neighborize
 
 
 from ._distances import distances
