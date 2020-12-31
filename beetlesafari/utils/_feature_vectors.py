@@ -27,7 +27,7 @@ def neighborized_feature_vectors(
 
     neighborized_element = None
     for key in key_selection:
-        print("key", key)
+        #print("key", key)
         element = input[key]
 
         output.append(element)

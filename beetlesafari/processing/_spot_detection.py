@@ -1,6 +1,6 @@
 import pyclesperanto_prototype as cle
 
-def spot_detection(input : cle.Image, output : cle.Image, threshold : float = 50.0):
+def spot_detection(input : cle.Image, output : cle.Image, threshold : float = 50.0, radius=0):
     import time
     start_time = time.time()
     if output is None:
@@ -13,7 +13,7 @@ def spot_detection(input : cle.Image, output : cle.Image, threshold : float = 50
         spot_detection.temp_flop = cle.create(input)
 
     # detect maxima
-    cle.detect_maxima_box(input, spot_detection.temp_flop)
+    cle.detect_maxima_box(input, spot_detection.temp_flop, radius_x=radius, radius_y=radius, radius_z=radius)
 
     # threshold
     cle.greater_constant(input, output, constant=threshold)

@@ -8,31 +8,58 @@ def collect_statistics(
         neighbor_statistics : bool = True,
         intensity_statistics : bool = True,
         shape_statistics : bool = True,
-        delta_statistics : bool = True
+        delta_statistics : bool = True,
+        touch_matrix : cle.Image = None,
+        neighbors_of_neighbors : cle.Image = None,
+        neighbors_of_neighbors_of_neighbors : cle.Image = None,
+        centroids : cle.Image = None
 ):
     from ..processing import distances, neighbors
+    from ..utils import stopwatch
     import numpy as np
 
     dict = {}
 
     if neighbor_statistics:
-        touch_matrix, neighbors_of_neighbors, neighbors_of_neighbors_of_neighbors = neighbors(cells)
+        # stopwatch()
+        if touch_matrix is None or neighbors_of_neighbors is None or neighbors_of_neighbors_of_neighbors is None:
+            touch_matrix, neighbors_of_neighbors, neighbors_of_neighbors_of_neighbors = neighbors(cells)
 
-        pointlist = cle.centroids_of_labels(cells)
+        # stopwatch("init")
+        if centroids is None:
+            centroids = cle.centroids_of_labels(cells)
+            # stopwatch("centroids")
+
         #print("pointlist", pointlist.shape)
-        distance_matrix = cle.generate_distance_matrix(pointlist, pointlist)
+        distance_matrix = cle.generate_distance_matrix(centroids, centroids)
+        # stopwatch("dist matrix")
 
         # topology measurements
         dict['nearest_neighbor_distance_n1'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=1))
+
+        # stopwatch("avg dst 1")
+
         #dict['nearest_neighbor_distance_n4'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=4))
         dict['nearest_neighbor_distance_n6'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=6))
+
+        # stopwatch("avg dst 2")
+
         #dict['nearest_neighbor_distance_n8'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=8))
         dict['nearest_neighbor_distance_n20']= _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=20))
 
+        # stopwatch("avg dst 3")
+
         dict['nearest_neighbor_distance'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=1))
+
+        # stopwatch("avg dst 4")
+
         dict['touching_neighbor_count'] = _cle_to_1d_np(cle.count_touching_neighbors(touch_matrix))
 
+        # stopwatch("avg dst 5")
+
     if delta_statistics or intensity_statistics or shape_statistics:
+        # stopwatch("B")
+
         # intensity based measurements
         regionprops = cle.statistics_of_background_and_labelled_pixels(image, cells)
 
@@ -66,10 +93,13 @@ def collect_statistics(
             other_pointlist = cle.centroids_of_labels(subsequent_cells)
             displacement_matrix = cle.generate_distance_matrix(pointlist, other_pointlist)
             dict['displacement_estimation'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(displacement_matrix))
+    # stopwatch("C")
 
     # ignore measurements with background
     for key in dict.keys():
         dict[key][0] = 0
+
+    # stopwatch("D")
 
     return dict
 

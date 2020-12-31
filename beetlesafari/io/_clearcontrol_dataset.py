@@ -1,3 +1,4 @@
+import pyclesperanto_prototype as cle
 
 class ClearControlDataset:
 
@@ -50,3 +51,12 @@ class ClearControlDataset:
 
     def get_duration_in_seconds(self):
         return self.times_in_seconds[-1]
+
+    def get_resampled_image(self, index, resampled_image : cle.Image):
+        input_image = cle.push_zyx(self.get_image(index))
+        voxel_size = self.get_voxel_size_zyx(index)
+
+        resampled_image = cle.resample(input_image, resampled_image, factor_x=voxel_size[2], factor_y=voxel_size[1],
+                                       factor_z=voxel_size[0])
+
+        return resampled_image

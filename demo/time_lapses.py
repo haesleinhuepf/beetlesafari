@@ -2,12 +2,17 @@ from beetlesafari import ClearControlDataset
 from beetlesafari import seconds_to_hours
 from beetlesafari import hours_to_seconds
 
-delta_time_in_seconds = hours_to_seconds(0.5)
+delta_time_in_seconds = hours_to_seconds(1)
 
-start_time_in_seconds = hours_to_seconds(14)
-end_time_in_seconds = hours_to_seconds(26)
+start_time_in_seconds = hours_to_seconds(12)
+end_time_in_seconds = hours_to_seconds(24)
 
-ds = ClearControlDataset('C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR')
+cc_dataset = ClearControlDataset('C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR')
+
+sigma_noise_removal = 2
+sigma_background_removal = 7
+spot_detection_threshold = 20
+
 
 output_dir = "C:/structure/temp/lund/"
 
@@ -18,41 +23,81 @@ import beetlesafari as bs
 cle.select_device("RTX")
 
 
-resampled_image = None
-mesh = None
 
 import time
 timestamp = time.time()
 
-# make a delta_time that allows us to select 10 time points
-n_timepoints = 5
-delta_time = (end_time_in_seconds - start_time_in_seconds) / (n_timepoints + 1)
-
-for num_classes in [4, 6]:
-
+def from_dataset_to_raw_statistics(
+        cc_dataset : ClearControlDataset,
+        start_time_in_seconds : float,
+        end_time_in_seconds : float = None,
+        num_timepoints : int = 1,
+        sigma_noise_removal : float = 2,
+        sigma_background_removal : float = 7,
+        spot_detection_threshold : float = 10
+):
     data = None
+    spots_to_keep = None
+
+    if end_time_in_seconds is None or num_timepoints == 1:
+        # make sure we execute the loop below once
+        end_time_in_seconds = start_time_in_seconds + 0.1
+        delta_time = 0.1
+    else:
+        # make a delta_time that allows us to select 10 time points
+        delta_time = (end_time_in_seconds - start_time_in_seconds) / (num_timepoints + 1)
+
+    resampled_image = None
+    cells = None
 
     for t in np.arange(start_time_in_seconds, end_time_in_seconds, delta_time):
-        print("delta time                          ", time.time() - timestamp)
-        timestamp = time.time()
+        print("DATA", t)
 
-        index = ds.get_index_after_time(t)
-        input_image = cle.push_zyx(ds.get_image(index))
-        voxel_size = ds.get_voxel_size_zyx(index)
+        from beetlesafari import stopwatch
 
-        resampled_image = cle.resample(input_image, resampled_image, factor_x = voxel_size[2], factor_y = voxel_size[1], factor_z = voxel_size[0])
+        stopwatch()
+        index = cc_dataset.get_index_after_time(t)
+        resampled_image = cc_dataset.get_resampled_image(index, resampled_image)
+
+        stopwatch("load")
 
         print(resampled_image.shape)
 
-        cells = bs.segmentation(resampled_image)
+        cells, spots = bs.segmentation(resampled_image, cells, sigma_noise_removal=sigma_noise_removal, sigma_background_removal=sigma_background_removal, spot_detection_threshold=spot_detection_threshold)
+
+        stopwatch()
 
         touch_matrix, neighbors_of_neighbors, neighbors_of_neighbors_of_neighbors = bs.neighbors(cells)
 
+        stopwatch("determine neighbors")
+
+        spots_to_keep = cle.binary_and(cells, spots, spots_to_keep)
+        cle.multiply_images(spots_to_keep, cells, spots)
+
+        pointlist = cle.labelled_spots_to_pointlist(spots)
+
+        stopwatch("centroids")
+
         # ---------------------------------
         # Measurements
-        meausrements = bs.collect_statistics(resampled_image, cells)
+        meausrements = bs.collect_statistics(
+            resampled_image, cells,
+            #neighbor_statistics=True,
+            #intensity_statistics=False,
+            #shape_statistics=False,
+            #delta_statistics=False,
+            touch_matrix=touch_matrix,
+            neighbors_of_neighbors=neighbors_of_neighbors,
+            neighbors_of_neighbors_of_neighbors=neighbors_of_neighbors_of_neighbors,
+            centroids=pointlist
+        )
 
-        single_timepoint_data = bs.neighborized_feature_vectors(meausrements, [touch_matrix, neighbors_of_neighbors, neighbors_of_neighbors_of_neighbors])
+        stopwatch("collect statistics")
+
+        single_timepoint_data = bs.neighborized_feature_vectors(meausrements, [touch_matrix, neighbors_of_neighbors,
+                                                                               neighbors_of_neighbors_of_neighbors])
+
+        stopwatch("make feature vectors")
 
         if data is None:
             data = single_timepoint_data
@@ -61,40 +106,58 @@ for num_classes in [4, 6]:
 
         print("data shape", data.shape)
 
-    # model training
-    from sklearn import mixture
+    return {
+        'data':data,
+        'index':index,
+        'resampled_image':resampled_image,
+        'cells':cells,
+        'spots':spots,
+        'touch_matrix':touch_matrix,
+        'neighbors_of_neighbors':neighbors_of_neighbors,
+        'neighbors_of_neighbors_of_neighbors':neighbors_of_neighbors_of_neighbors,
+        'centroids':pointlist
+    }
 
-    # fit a Gaussian Mixture Model with two components
-    clf = mixture.GaussianMixture(n_components=num_classes, covariance_type='full')
-    clf.fit(data)
+n_timepoints = 10
+bundle = from_dataset_to_raw_statistics(cc_dataset, start_time_in_seconds, end_time_in_seconds, num_timepoints=n_timepoints, spot_detection_threshold=spot_detection_threshold)
+data = bundle['data']
+print(data.shape)
+resampled_image = None
+mesh = None
+
+for num_classes in [5]:
+
+    #model = bs.k_means_clustering(data, num_classes)
+    model = bs.gaussian_mixture_model(data, num_classes)
 
     for t in np.arange(start_time_in_seconds, end_time_in_seconds, delta_time_in_seconds):
 
-        index = ds.get_index_after_time(t)
-        input_image = cle.push_zyx(ds.get_image(index))
-        voxel_size = ds.get_voxel_size_zyx(index)
+        bundle = from_dataset_to_raw_statistics(cc_dataset, t, spot_detection_threshold=spot_detection_threshold)
+        cells = bundle['cells']
+        single_timepoint_data = bundle['data']
+        touch_matrix = bundle['touch_matrix']
+        index = bundle['index']
+        resampled_image = bundle['resampled_image']
+        centroids = bundle['centroids']
 
-        resampled_image = cle.resample(input_image, resampled_image, factor_x = voxel_size[2], factor_y = voxel_size[1], factor_z = voxel_size[0])
+        from beetlesafari import stopwatch
 
-        print(resampled_image.shape)
+        stopwatch()
 
-        cells = bs.segmentation(resampled_image)
+        # = #cle.draw_mesh_between_touching_labels(cells, mesh)
 
-        touch_matrix, neighbors_of_neighbors, neighbors_of_neighbors_of_neighbors = bs.neighbors(cells)
+        if mesh is None:
+            mesh = cle.create_like(resampled_image)
+        cle.set(mesh, 0)
+        mesh = cle.touch_matrix_to_mesh(centroids, touch_matrix, mesh)
 
-        mesh = cle.draw_mesh_between_touching_labels(cells, mesh)
-
-        # ---------------------------------
-        # Measurements
-        meausrements = bs.collect_statistics(resampled_image, cells)
-
-        single_timepoint_data = bs.neighborized_feature_vectors(meausrements, [touch_matrix, neighbors_of_neighbors, neighbors_of_neighbors_of_neighbors])
-
+        stopwatch("mesh")
 
         try:
             # print(clf.means_, clf.covariances_)
 
-            gmm_prediction = clf.predict(single_timepoint_data)
+            gmm_prediction = model.predict(single_timepoint_data)
+            #bs.gaussian_mixture_model_predict(model, single_timepoint_data)
 
             prediction_vector = cle.push_zyx(np.asarray([gmm_prediction]) + 1)
             cle.set_column(prediction_vector, 0, 0)
@@ -117,7 +180,7 @@ for num_classes in [4, 6]:
 
             import os
 
-            path = output_dir + "/gmm" + str(num_classes) + "/"
+            path = output_dir + "/kmc" + str(num_classes) + "/"
             if not os.path.exists(path):
                 os.mkdir(path)
 
@@ -133,7 +196,7 @@ for num_classes in [4, 6]:
             cle.maximum_z_projection(resampled_image, proj_image)
             imsave(output_dir + "/img/" + index_to_clearcontrol_filename(index) + ".tif", cle.pull_zyx(proj_image))
 
-            # break
+            #break
 
         except ValueError:
             pass
