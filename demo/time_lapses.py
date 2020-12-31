@@ -2,7 +2,7 @@ from beetlesafari import ClearControlDataset
 from beetlesafari import seconds_to_hours
 from beetlesafari import hours_to_seconds
 
-delta_time_in_seconds = hours_to_seconds(1)
+delta_time_in_seconds = hours_to_seconds(0.25)
 
 start_time_in_seconds = hours_to_seconds(12)
 end_time_in_seconds = hours_to_seconds(24)
@@ -11,7 +11,7 @@ cc_dataset = ClearControlDataset('C:/structure/data/2019-12-17-16-54-37-81-Lund_
 
 sigma_noise_removal = 2
 sigma_background_removal = 7
-spot_detection_threshold = 20
+spot_detection_threshold = 25
 
 
 output_dir = "C:/structure/temp/lund/"
@@ -180,7 +180,7 @@ for num_classes in [5]:
 
             import os
 
-            path = output_dir + "/kmc" + str(num_classes) + "/"
+            path = output_dir + "/gmm" + str(num_classes) + "/"
             if not os.path.exists(path):
                 os.mkdir(path)
 
