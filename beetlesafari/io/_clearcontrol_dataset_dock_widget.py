@@ -1,4 +1,4 @@
-from datetime import time
+from datetime import datetime
 
 from magicgui import magicgui
 from ._clearcontrol_dataset import ClearControlDataset
@@ -6,16 +6,18 @@ from ._clearcontrol_dataset import ClearControlDataset
 @magicgui(
     auto_call=True,
     layout='vertical',
-    hours={'minimum':0, 'maximum':1000},
-    minutes={'minimum': 0, 'maximum': 1000000},
-    seconds={'minimum': 0, 'maximum': 1000000},
+    timepoint={'displayFormat':'hh:mm:ss'}
 )
-def _clearcontrol_loader(directory : str = "C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR", dataset_name : str = 'C0opticsprefused', hours : int = 0, minutes : int = 0, seconds : int = 0, ):
+def _clearcontrol_loader(directory : str = "C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR", dataset_name : str = 'C0opticsprefused', timepoint : datetime = datetime(2021,1,1,0,0,0)):
     if directory is None:
         # we have to do it like this becasue the assistant hands over None at the first call
         directory = "C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR"
 
     cc_dataset : ClearControlDataset = ClearControlDataset(directory)
+
+    hours = timepoint.hour
+    minutes = timepoint.minute
+    seconds = timepoint.second
 
     index = cc_dataset.get_index_after_time(hours * 60 * 60 + minutes * 60 + seconds)
     print('Load index', index)
