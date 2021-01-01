@@ -20,10 +20,10 @@ def segmentation(image, cells : cle.Image = None, sigma_noise_removal : float = 
     stopwatch("spot detect")
 
     # temporary workaround; see https://github.com/clEsperanto/pyclesperanto_prototype/issues/63
-    new_spots = cle.create_like(spots)
-    cle.close_index_gaps_in_label_map(spots, new_spots)
-    spots = new_spots
-    print("corrected number of spots", cle.maximum_of_all_pixels(spots))
+    #new_spots = cle.create_like(spots)
+    #cle.close_index_gaps_in_label_map(spots, new_spots)
+    #spots = new_spots
+    #print("corrected number of spots", cle.maximum_of_all_pixels(spots))
 
     stopwatch("spot correction")
 
@@ -38,10 +38,10 @@ def segmentation(image, cells : cle.Image = None, sigma_noise_removal : float = 
     print("number of cells", cle.maximum_of_all_pixels(cells))
 
     # temporary workaround; see https://github.com/clEsperanto/pyclesperanto_prototype/issues/63
-    new_cells = cle.create_like(cells)
-    cle.close_index_gaps_in_label_map(cells, new_cells)
-    cells = new_cells
-    print("corrected number of cells", cle.maximum_of_all_pixels(cells))
+    #new_cells = cle.create_like(cells)
+    #cle.close_index_gaps_in_label_map(cells, new_cells)
+    #cells = new_cells
+    #print("corrected number of cells", cle.maximum_of_all_pixels(cells))
 
     stopwatch("cell correction")
 
