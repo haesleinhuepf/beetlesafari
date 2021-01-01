@@ -43,7 +43,7 @@ def segmentation(image, cells : cle.Image = None, sigma_noise_removal : float = 
     #cells = new_cells
     #print("corrected number of cells", cle.maximum_of_all_pixels(cells))
 
-    stopwatch("cell correction")
+    #stopwatch("cell correction")
 
     return cells, spots
 
