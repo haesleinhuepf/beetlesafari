@@ -13,3 +13,5 @@ from ._neighbors import neighborize
 
 
 from ._distances import distances
+
+from ._crop import attach_crop_dock_widget

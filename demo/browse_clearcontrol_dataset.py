@@ -9,9 +9,9 @@ with napari.gui_qt():
     import napari_pyclesperanto_assistant
     assistant_gui = napari_pyclesperanto_assistant.napari_plugin(viewer)
 
-    from beetlesafari import attach_clearcontrol_dock_widget
-    attach_clearcontrol_dock_widget(assistant_gui)
-
+    import beetlesafari as bs
+    bs.attach_clearcontrol_dock_widget(assistant_gui)
+    bs.attach_crop_dock_widget(assistant_gui)
 
 
 
