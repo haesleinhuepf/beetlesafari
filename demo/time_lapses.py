@@ -71,8 +71,8 @@ def from_dataset_to_raw_statistics(
 
         stopwatch("determine neighbors")
 
-        spots_to_keep = cle.binary_and(cells, spots, spots_to_keep)
-        cle.multiply_images(spots_to_keep, cells, spots)
+        #spots_to_keep = cle.binary_and(cells, spots, spots_to_keep)
+        #cle.multiply_images(spots_to_keep, cells, spots)
 
         pointlist = cle.labelled_spots_to_pointlist(spots)
 
@@ -128,7 +128,8 @@ mesh = None
 for num_classes in [5]:
 
     #model = bs.k_means_clustering(data, num_classes)
-    model = bs.gaussian_mixture_model(data, num_classes)
+    #model = bs.gaussian_mixture_model(data, num_classes)
+    model = bs.spectral_clustering(data, num_classes)
 
     for t in np.arange(start_time_in_seconds, end_time_in_seconds, delta_time_in_seconds):
 
@@ -180,7 +181,7 @@ for num_classes in [5]:
 
             import os
 
-            path = output_dir + "/gmm" + str(num_classes) + "/"
+            path = output_dir + "/sc" + str(num_classes) + "/"
             if not os.path.exists(path):
                 os.mkdir(path)
 
