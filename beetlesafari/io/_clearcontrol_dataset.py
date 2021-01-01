@@ -52,7 +52,7 @@ class ClearControlDataset:
     def get_duration_in_seconds(self):
         return self.times_in_seconds[-1]
 
-    def get_resampled_image(self, index, resampled_image : cle.Image):
+    def get_resampled_image(self, index, resampled_image : cle.Image = None):
         input_image = cle.push_zyx(self.get_image(index))
         voxel_size = self.get_voxel_size_zyx(index)
 
