@@ -21,7 +21,7 @@ def cell_segmentation(input : cle.Image, output : cle.Image, number_of_dilations
         cle.onlyzero_overwrite_maximum_diamond(cell_segmentation.temp_flop, cell_segmentation.temp_flag, cell_segmentation.temp_flip)
 
     # shrink labels a bit again
-    cle.greater_constant(cell_segmentation.temp_flip, output, constant=1)
+    cle.greater_constant(cell_segmentation.temp_flip, output, constant=0)
     for i in range(0, number_of_erosions):
         cle.erode_box(output, cell_segmentation.temp_flop)
         cle.erode_box(cell_segmentation.temp_flop, output)
