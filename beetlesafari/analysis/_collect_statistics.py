@@ -20,7 +20,7 @@ def collect_statistics(
 
     dict = {}
 
-    if neighbor_statistics:
+    if neighbor_statistics or shape_statistics:
         # stopwatch()
         if touch_matrix is None or neighbors_of_neighbors is None or neighbors_of_neighbors_of_neighbors is None:
             touch_matrix, neighbors_of_neighbors, neighbors_of_neighbors_of_neighbors = neighbors(cells)
@@ -34,28 +34,34 @@ def collect_statistics(
         distance_matrix = cle.generate_distance_matrix(centroids, centroids)
         # stopwatch("dist matrix")
 
-        # topology measurements
-        dict['nearest_neighbor_distance_n1'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=1))
+        if neighbor_statistics:
+            # topology measurements
+            dict['nearest_neighbor_distance_n1'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=1))
 
-        # stopwatch("avg dst 1")
+            # stopwatch("avg dst 1")
 
-        #dict['nearest_neighbor_distance_n4'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=4))
-        dict['nearest_neighbor_distance_n6'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=6))
+            #dict['nearest_neighbor_distance_n4'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=4))
+            dict['nearest_neighbor_distance_n6'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=6))
 
-        # stopwatch("avg dst 2")
+            # stopwatch("avg dst 2")
 
-        #dict['nearest_neighbor_distance_n8'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=8))
-        dict['nearest_neighbor_distance_n20']= _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=20))
+            #dict['nearest_neighbor_distance_n8'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=8))
+            dict['nearest_neighbor_distance_n20']= _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=20))
 
-        # stopwatch("avg dst 3")
+            # stopwatch("avg dst 3")
 
-        dict['nearest_neighbor_distance'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=1))
+            dict['nearest_neighbor_distance'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=1))
 
-        # stopwatch("avg dst 4")
+            # stopwatch("avg dst 4")
 
-        dict['touching_neighbor_count'] = _cle_to_1d_np(cle.count_touching_neighbors(touch_matrix))
+            dict['touching_neighbor_count'] = _cle_to_1d_np(cle.count_touching_neighbors(touch_matrix))
 
-        # stopwatch("avg dst 5")
+            # stopwatch("avg dst 5")
+        if shape_statistics:
+            dict['minimum_distance_of_touching_neighbors'] = _cle_to_1d_np(cle.minimum_distance_of_touching_neighbors(distance_matrix, touch_matrix))
+            dict['maximum_distance_of_touching_neighbors'] = _cle_to_1d_np(cle.maximum_distance_of_touching_neighbors(distance_matrix, touch_matrix))
+            dict['average_distance_of_touching_neighbors'] = _cle_to_1d_np(cle.average_distance_of_touching_neighbors(distance_matrix, touch_matrix))
+            dict['aspect_ratio_between_touching_neighbors'] = _regionprops_to_1d_np(dict['maximum_distance_of_touching_neighbors'] / dict['minimum_distance_of_touching_neighbors'])
 
     if delta_statistics or intensity_statistics or shape_statistics:
         # stopwatch("B")
