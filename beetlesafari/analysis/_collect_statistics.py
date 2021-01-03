@@ -70,34 +70,34 @@ def collect_statistics(
         regionprops = cle.statistics_of_background_and_labelled_pixels(image, cells)
 
         if intensity_statistics:
-            dict['mean_intensity'] = _regionprops_to_1d_np([r.mean_intensity for r in regionprops])
-            dict['standard_deviation_intensity'] = _regionprops_to_1d_np([r.standard_deviation_intensity for r in regionprops])
-            dict['minimum_intensity'] = _regionprops_to_1d_np([r.min_intensity for r in regionprops])
-            dict['maximum_intensity'] = _regionprops_to_1d_np([r.max_intensity for r in regionprops])
+            dict['mean_intensity'] = _regionprops_to_1d_np(regionprops['mean_intensity'])
+            dict['standard_deviation_intensity'] = _regionprops_to_1d_np(regionprops['standard_deviation_intensity'])
+            dict['minimum_intensity'] = _regionprops_to_1d_np(regionprops['min_intensity'])
+            dict['maximum_intensity'] = _regionprops_to_1d_np(regionprops['max_intensity'])
 
         # intensity measurements related to second timepoint
         if delta_statistics and subsequent_image is not None:
             # determine local changes
             squared_difference_image = cle.squared_difference(image, subsequent_image)
             regionprops2 = cle.statistics_of_background_and_labelled_pixels(squared_difference_image, cells)
-            dict['mean_squared_error_intensity'] = _regionprops_to_1d_np([r.mean_intensity for r in regionprops2])
+            dict['mean_squared_error_intensity'] = _regionprops_to_1d_np(regionprops2['mean_intensity'])
 
         if shape_statistics:
-            dict['size'] = _regionprops_to_1d_np([r.area for r in regionprops])
+            dict['size'] = _regionprops_to_1d_np(regionprops['area'])
 
             # shape measurements
-            dict['major_axis_length'] = _regionprops_to_1d_np([r.major_axis_length for r in regionprops])
-            dict['minor_axis_length'] = _regionprops_to_1d_np([r.minor_axis_length for r in regionprops])
+            #dict['major_axis_length'] = _regionprops_to_1d_np(regionprops['major_axis_length'])
+            #dict['minor_axis_length'] = _regionprops_to_1d_np(regionprops['minor_axis_length'])
 
-            dict['sum_distance_to_centroid'] = _regionprops_to_1d_np([r.sum_distance_to_centroid for r in regionprops])
-            dict['mean_distance_to_centroid'] = _regionprops_to_1d_np([r.mean_distance_to_centroid for r in regionprops])
-            dict['mean_max_distance_to_centroid_ratio'] = _regionprops_to_1d_np([r.mean_max_distance_to_centroid_ratio for r in regionprops])
+            dict['sum_distance_to_centroid'] = _regionprops_to_1d_np(regionprops['sum_distance_to_centroid'])
+            dict['mean_distance_to_centroid'] = _regionprops_to_1d_np(regionprops['mean_distance_to_centroid'])
+            dict['mean_max_distance_to_centroid_ratio'] = _regionprops_to_1d_np(regionprops['mean_max_distance_to_centroid_ratio'])
 
         # measurements related to second timepoint
         if delta_statistics and subsequent_cells is not None:
             # measure distance to closest cell centroid in the other image
             other_pointlist = cle.centroids_of_labels(subsequent_cells)
-            displacement_matrix = cle.generate_distance_matrix(pointlist, other_pointlist)
+            displacement_matrix = cle.generate_distance_matrix(centroids, other_pointlist)
             dict['displacement_estimation'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(displacement_matrix))
     # stopwatch("C")
 
