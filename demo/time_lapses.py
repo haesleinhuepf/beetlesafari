@@ -4,17 +4,21 @@ import beetlesafari as bs
 
 delta_time_in_seconds = bs.minutes_to_seconds(5)
 
-start_time_in_seconds = bs.hours_to_seconds(0)
+start_time_in_seconds = bs.hours_to_seconds(2)
 end_time_in_seconds = bs.hours_to_seconds(48)
 
-cc_dataset = bs.ClearControlDataset('C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR')
+cc_dataset = bs.ClearControlDataset('C:/structure/data/2019-10-28-17-22-59-23-Finsterwalde_Tribolium_nGFP/')
 
 sigma_noise_removal = 2
-sigma_background_removal = 7
+sigma_background_removal = 17
 spot_detection_threshold = 25
 
 
-output_dir = "C:/structure/temp/lund/"
+n_timepoints = 2
+
+num_class_aelection = [7]
+
+output_dir = "C:/structure/temp/aosta/"
 
 
 cle.select_device("RTX")
@@ -115,14 +119,13 @@ def from_dataset_to_raw_statistics(
         'centroids':pointlist
     }
 
-n_timepoints = 20
 bundle = from_dataset_to_raw_statistics(cc_dataset, start_time_in_seconds, end_time_in_seconds, num_timepoints=n_timepoints, spot_detection_threshold=spot_detection_threshold)
 data = bundle['data']
 print(data.shape)
 resampled_image = None
 mesh = None
 
-for num_classes in [6, 8, 10]:
+for num_classes in num_class_aelection:
 
     #model = bs.k_means_clustering(data, num_classes)
     model = bs.gaussian_mixture_model(data, num_classes)
@@ -195,7 +198,7 @@ for num_classes in [6, 8, 10]:
             cle.maximum_z_projection(resampled_image, proj_image)
             imsave(output_dir + "/img/" + index_to_clearcontrol_filename(index) + ".tif", cle.pull_zyx(proj_image))
 
-            #break
+            quit()
 
         except ValueError:
             pass

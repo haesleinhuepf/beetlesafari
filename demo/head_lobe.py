@@ -4,6 +4,7 @@ import napari
 with napari.gui_qt():
     # start napari
     viewer = napari.Viewer()
+    viewer.open("data/Lund_001000_head_lobe_crop.tif")
 
     # attach the assistant
     import napari_pyclesperanto_assistant

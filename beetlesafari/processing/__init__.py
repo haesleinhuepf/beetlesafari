@@ -15,3 +15,4 @@ from ._neighbors import neighborize
 from ._distances import distances
 
 from ._crop import attach_crop_dock_widget
+from ._segmentation import attach_segmentation_dock_widget
