@@ -29,13 +29,15 @@ class ClearControlDataset:
             self.depths.append(int(third_element[2]))
 
     def get_image(self, index = 0):
-        from ..utils import index_to_clearcontrol_filename
-        filename = self.directory_name + "/stacks/" + self.dataset_name + "/" + index_to_clearcontrol_filename(index)
-
+        filename = self.get_image_filename(index)
         from ._imread_raw import imread_raw
         return imread_raw(filename, self.widths[index], self.heights[index], self.depths[index])
 
-    def get_voxel_size_zyx(self, index):
+    def get_image_filename(self, index = 0):
+        from ..utils import index_to_clearcontrol_filename
+        return self.directory_name + "/stacks/" + self.dataset_name + "/" + index_to_clearcontrol_filename(index)
+
+    def get_voxel_size_zyx(self, index = 0):
         metadata = self.metadata[index]
 
         return [
