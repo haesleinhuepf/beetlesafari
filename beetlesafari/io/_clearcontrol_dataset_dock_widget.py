@@ -20,6 +20,7 @@ def _clearcontrol_loader(directory : str = "C:/structure/data/2019-12-17-16-54-3
     seconds = timepoint.second
 
     index = cc_dataset.get_index_after_time(hours * 60 * 60 + minutes * 60 + seconds)
+    filename = cc_dataset.get_image_filename(index)
     print('Load index', index)
     output = cc_dataset.get_resampled_image(index)
 
@@ -39,6 +40,7 @@ def _clearcontrol_loader(directory : str = "C:/structure/data/2019-12-17-16-54-3
         _clearcontrol_loader.self.layer.data = output
         _clearcontrol_loader.self.layer.name = "CCds" + str(index)
         _clearcontrol_loader.self.layer.contrast_limits = (min_intensity, max_intensity)
+        _clearcontrol_loader.self.layer.metadata['filename'] = filename
 
 
 from napari_pyclesperanto_assistant import AssistantGUI
