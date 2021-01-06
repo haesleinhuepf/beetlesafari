@@ -55,18 +55,21 @@ from napari.layers import Image
 @magicgui(
     auto_call=True,
     layout='vertical',
+    sigma_noise_removal={'minimum': 0, 'maximum': 1000},
+    sigma_background_removal={'minimum': 0, 'maximum': 1000},
+    spot_detection_threshold={'minimum': 0, 'maximum': 100000},
 )
 def _segmentation(
-        intensity: Image = None,
+        input1: Image = None,
         sigma_noise_removal: float = 2,
-        sigma_background_removal: float = 7,
+        sigma_background_removal: float = 15,
         spot_detection_threshold: float = 10,
         spots_only: bool = False
 ):
     import pyclesperanto_prototype as cle
     import beetlesafari as bs
 
-    image = cle.push_zyx(intensity.data)
+    image = cle.push_zyx(input1.data)
     cells, spots = bs.segmentation(image, sigma_noise_removal=sigma_noise_removal,
                                    sigma_background_removal=sigma_background_removal,
                                    spot_detection_threshold=spot_detection_threshold)
@@ -85,7 +88,7 @@ def _segmentation(
     else:
         _segmentation.self.layer.data = result
         _segmentation.self.layer.name = "Segmentation"
-        _segmentation.self.layer.contrast_limits = (0, max_intensity)
+        #_segmentation.self.layer.contrast_limits = (0, max_intensity)
 
 
 from napari_pyclesperanto_assistant import AssistantGUI
