@@ -4,10 +4,10 @@ import beetlesafari as bs
 
 delta_time_in_seconds = bs.minutes_to_seconds(5)
 
-start_time_in_seconds = bs.hours_to_seconds(2)
+start_time_in_seconds = bs.hours_to_seconds(0)
 end_time_in_seconds = bs.hours_to_seconds(48)
 
-cc_dataset = bs.ClearControlDataset('C:/structure/data/2019-10-28-17-22-59-23-Finsterwalde_Tribolium_nGFP/')
+cc_dataset = bs.ClearControlDataset('C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR/')
 
 sigma_noise_removal = 2
 sigma_background_removal = 17
@@ -16,12 +16,12 @@ spot_detection_threshold = 25
 
 n_timepoints = 2
 
-num_class_aelection = [7]
+num_class_aelection = [2, 4, 5, 6, 7, 10]
 
-output_dir = "C:/structure/temp/aosta/"
+output_dir = "C:/structure/temp/lund/"
 
 
-cle.select_device("RTX")
+print(cle.select_device("RTX"))
 
 
 
@@ -181,7 +181,7 @@ for num_classes in num_class_aelection:
 
             import os
 
-            path = output_dir + "/gmm" + str(num_classes) + "/"
+            path = output_dir + "/kmc" + str(num_classes) + "/"
             if not os.path.exists(path):
                 os.mkdir(path)
 
@@ -198,7 +198,7 @@ for num_classes in num_class_aelection:
             cle.maximum_z_projection(resampled_image, proj_image)
             imsave(output_dir + "/img/" + index_to_clearcontrol_filename(index) + ".tif", cle.pull_zyx(proj_image))
 
-            quit()
+            # quit()
 
         except ValueError:
             pass
