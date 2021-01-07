@@ -28,16 +28,27 @@ class ClearControlDataset:
             self.heights.append(int(third_element[1]))
             self.depths.append(int(third_element[2]))
 
-    def get_image(self, index = 0):
+    def _handle_index_and_time(self, index, time_in_seconds):
+        if index is None and time_in_seconds is None:
+            index = 0
+        if index is None:
+            index = self.get_index_after_time(time_in_seconds)
+        return index, time_in_seconds
+
+    def get_image(self, index = None, time_in_seconds = None):
+        index, time_in_seconds = self._handle_index_and_time(index, time_in_seconds)
+
         filename = self.get_image_filename(index)
         from ._imread_raw import imread_raw
         return imread_raw(filename, self.widths[index], self.heights[index], self.depths[index])
 
-    def get_image_filename(self, index = 0):
+    def get_image_filename(self, index = None, time_in_seconds = None):
+        index, time_in_seconds = self._handle_index_and_time(index, time_in_seconds)
         from ..utils import index_to_clearcontrol_filename
         return self.directory_name + "/stacks/" + self.dataset_name + "/" + index_to_clearcontrol_filename(index)
 
-    def get_voxel_size_zyx(self, index = 0):
+    def get_voxel_size_zyx(self, index = None, time_in_seconds = None):
+        index, time_in_seconds = self._handle_index_and_time(index, time_in_seconds)
         metadata = self.metadata[index]
 
         return [
@@ -54,7 +65,9 @@ class ClearControlDataset:
     def get_duration_in_seconds(self):
         return self.times_in_seconds[-1]
 
-    def get_resampled_image(self, index, resampled_image : cle.Image = None):
+    def get_resampled_image(self, index = None, time_in_seconds = None, resampled_image : cle.Image = None):
+        index, time_in_seconds = self._handle_index_and_time(index, time_in_seconds)
+
         input_image = cle.push_zyx(self.get_image(index))
         voxel_size = self.get_voxel_size_zyx(index)
 
@@ -62,3 +75,5 @@ class ClearControlDataset:
                                        factor_z=voxel_size[0])
 
         return resampled_image
+
+
