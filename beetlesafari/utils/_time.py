@@ -9,3 +9,6 @@ def seconds_to_hours(seconds : float):
 
 def seconds_to_minutes(seconds: float):
     return seconds / 60
+
+def days_to_seconds(days : float):
+    return hours_to_seconds(24 * days)

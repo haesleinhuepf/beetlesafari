@@ -1,3 +1,4 @@
+from ._time import days_to_seconds
 from ._time import hours_to_seconds
 from ._time import minutes_to_seconds
 from ._time import seconds_to_hours
