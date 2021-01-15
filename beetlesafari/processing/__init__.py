@@ -6,3 +6,13 @@ from ._draw_mesh import draw_mesh
 
 from ._delayed_operation import delayed_unary_operation
 from ._delayed_operation import delayed_binary_operation
+
+from ._segmentation import segmentation
+from ._neighbors import neighbors
+from ._neighbors import neighborize
+
+
+from ._distances import distances
+
+from ._crop import attach_crop_dock_widget
+from ._segmentation import attach_segmentation_dock_widget
