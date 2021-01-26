@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from magicgui import magicgui
 from ._clearcontrol_dataset import ClearControlDataset
@@ -6,18 +6,17 @@ from ._clearcontrol_dataset import ClearControlDataset
 @magicgui(
     auto_call=True,
     layout='vertical',
-    timepoint={'displayFormat':'hh:mm:ss'}
 )
-def _clearcontrol_loader(directory : str = "C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR", dataset_name : str = 'C0opticsprefused', timepoint : datetime = datetime(2021,1,1,0,0,0)):
+def _clearcontrol_loader(directory : str = "C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR", dataset_name : str = 'C0opticsprefused', hours : int = 0, minutes : int = 0, seconds : int = 0):
     if directory is None:
         # we have to do it like this becasue the assistant hands over None at the first call
         directory = "C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR"
 
     cc_dataset : ClearControlDataset = ClearControlDataset(directory)
 
-    hours = timepoint.hour
-    minutes = timepoint.minute
-    seconds = timepoint.second
+    #hours = timepoint.hour
+    #minutes = timepoint.minute
+    #seconds = timepoint.second
 
     index = cc_dataset.get_index_after_time(hours * 60 * 60 + minutes * 60 + seconds)
     filename = cc_dataset.get_image_filename(index)
@@ -29,13 +28,12 @@ def _clearcontrol_loader(directory : str = "C:/structure/data/2019-12-17-16-54-3
     min_intensity = 0
     max_intensity = cle.maximum_of_all_pixels(output)
 
-    output = cle.pull_zyx(output)
+    output = cle.pull(output)
 
 
     # show result in napari
-    if (_clearcontrol_loader.initial_call):
+    if (_clearcontrol_loader.call_count == 0):
         _clearcontrol_loader.self.viewer.add_image(output)
-        _clearcontrol_loader.initial_call = False
     else:
         _clearcontrol_loader.self.layer.data = output
         _clearcontrol_loader.self.layer.name = "CCds" + str(index)
@@ -43,8 +41,8 @@ def _clearcontrol_loader(directory : str = "C:/structure/data/2019-12-17-16-54-3
         _clearcontrol_loader.self.layer.metadata['filename'] = filename
 
 
-from napari_pyclesperanto_assistant import AssistantGUI
+from napari_pyclesperanto_assistant import Assistant
 
-def attach_clearcontrol_dock_widget(assistant : AssistantGUI):
+def attach_clearcontrol_dock_widget(assistant : Assistant):
 
     assistant.add_button("ClearControl loader", _clearcontrol_loader)

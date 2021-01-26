@@ -33,7 +33,8 @@ def __clustering_dock_widget(input1 : Image = None,
     import pyclesperanto_prototype as cle
     import pyopencl
 
-    try:
+    #try:
+    if True:
         intensity = cle.push_zyx(input1.data)
         labels = cle.push_zyx(input2.data)
 
@@ -59,8 +60,8 @@ def __clustering_dock_widget(input1 : Image = None,
         )
         stopwatch("collect statistics")
 
-        data = bs.neighborized_feature_vectors(meausrements, [touch_matrix, neighbors_of_neighbors,
-                                                              neighbors_of_neighbors_of_neighbors])
+        data = bs.neighborized_feature_vectors(meausrements, [touch_matrix, neighbors_of_neighbors])
+                                                              #, neighbors_of_neighbors_of_neighbors])
 
         if train:
             if algorithm == 'k_means_clustering':
@@ -77,7 +78,7 @@ def __clustering_dock_widget(input1 : Image = None,
 
         prediction = __clustering_dock_widget.model.predict(data)
 
-        prediction_vector = cle.push_zyx(np.asarray([prediction]) + 1)
+        prediction_vector = cle.push(np.asarray([prediction]) + 1)
         cle.set_column(prediction_vector, 0, 0)
 
         prediction_vector = cle.mode_of_touching_neighbors(prediction_vector, touch_matrix)
@@ -93,26 +94,26 @@ def __clustering_dock_widget(input1 : Image = None,
         prediction_map = cle.multiply_images(prediction_map, mesh)
 
         # show result in napari
-        if (__clustering_dock_widget.initial_call):
-            __clustering_dock_widget.self.viewer.add_labels(cle.pull_zyx(prediction_map))
-            __clustering_dock_widget.initial_call = False
+        if (__clustering_dock_widget.call_count == 0):
+            __clustering_dock_widget.self.viewer.add_labels(cle.pull(prediction_map), translate=input1.translate)
         else:
-            __clustering_dock_widget.self.layer.data = cle.pull_zyx(prediction_map)
+            __clustering_dock_widget.self.layer.data = cle.pull(prediction_map)
             __clustering_dock_widget.self.layer.name = algorithm + "(" +str(num_classes)+ " classes)"
+            __clustering_dock_widget.self.layer.translate = input1.translate
             #__clustering_dock_widget.self.layer.contrast_limits = (0, num_classes)
 
         #proj_image = cle.create([prediction_map.shape[1], prediction_map.shape[2]])
         #proj_image = cle.maximum_z_projection(prediction_map, proj_image)
-    except pyopencl._cl.MemoryError:
-        print ("OCL Memory error")
-    except pyopencl._cl.RuntimeError:
-        print("OCL Runtime error")
+    #except pyopencl._cl.MemoryError:
+    #    print ("OCL Memory error")
+    #except pyopencl._cl.RuntimeError:
+    #    print("OCL Runtime error")
 
 __clustering_dock_widget.model = None
 
 
-from napari_pyclesperanto_assistant import AssistantGUI
+from napari_pyclesperanto_assistant import Assistant
 
-def attach_clustering_dock_widget(assistant : AssistantGUI):
+def attach_clustering_dock_widget(assistant : Assistant):
 
     assistant.add_button("Beetlesafari clustering", __clustering_dock_widget)

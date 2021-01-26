@@ -40,15 +40,15 @@ from napari.layers import Image
 )
 def _segmentation(
         input1: Image = None,
-        sigma_noise_removal: float = 2,
+        sigma_noise_removal: float = 1,
         sigma_background_removal: float = 15,
-        spot_detection_threshold: float = 10,
+        spot_detection_threshold: float = 25,
         spots_only: bool = False
 ):
     import pyclesperanto_prototype as cle
     import beetlesafari as bs
 
-    image = cle.push_zyx(input1.data)
+    image = cle.push(input1.data)
     cells, spots = bs.segmentation(image, sigma_noise_removal=sigma_noise_removal,
                                    sigma_background_removal=sigma_background_removal,
                                    spot_detection_threshold=spot_detection_threshold)
@@ -56,21 +56,21 @@ def _segmentation(
     max_intensity = cle.maximum_of_all_pixels(cells)
 
     if spots_only:
-        result = cle.pull_zyx(spots_only)
+        result = cle.pull(spots_only)
     else:
-        result = cle.pull_zyx(cells)
+        result = cle.pull(cells)
 
     # show result in napari
-    if (_segmentation.initial_call):
-        _segmentation.self.viewer.add_labels(result)
-        _segmentation.initial_call = False
+    if (_segmentation.call_count == 0):
+        _segmentation.self.viewer.add_labels(result, translate=input1.translate)
     else:
         _segmentation.self.layer.data = result
         _segmentation.self.layer.name = "Segmentation"
+        _segmentation.self.layer.translate = input1.translate
 
 
-from napari_pyclesperanto_assistant import AssistantGUI
+from napari_pyclesperanto_assistant import Assistant
 
 
-def attach_segmentation_dock_widget(assistant: AssistantGUI):
+def attach_segmentation_dock_widget(assistant: Assistant):
     assistant.add_button("Beetlesafari segmentation", _segmentation)

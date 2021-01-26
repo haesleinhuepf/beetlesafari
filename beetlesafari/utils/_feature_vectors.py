@@ -26,27 +26,30 @@ def neighborized_feature_vectors(
     output = []
 
     neighborized_element = None
+    neighborized_non_nan_element = None
     for key in key_selection:
         #print("key", key)
         element = input[key]
 
         output.append(element)
 
-        element = cle.push_zyx(np.asarray([element]))
+        element = cle.push(np.asarray([element]))
 
         for neighborhood in neighborhoods:
             #print("n")
             #neighborized_element = cle.mode_of_touching_neighbors(element, neighborhood, neighborized_element)
             #output.append(cle.pull_zyx(neighborized_element)[0])
 
-            neighborized_element = cle.median_of_touching_neighbors(element, neighborhood, neighborized_element)
-            output.append(cle.pull_zyx(neighborized_element)[0])
+            #neighborized_element = cle.median_of_touching_neighbors(element, neighborhood, neighborized_element)
+            #output.append(cle.pull(neighborized_element)[0])
 
             neighborized_element = cle.standard_deviation_of_touching_neighbors(element, neighborhood, neighborized_element)
-            output.append(cle.pull_zyx(neighborized_element)[0])
+            neighborized_non_nan_element = cle.undefined_to_zero(element, neighborized_non_nan_element)
+            output.append(cle.pull(neighborized_non_nan_element)[0])
 
             neighborized_element = cle.mean_of_touching_neighbors(element, neighborhood, neighborized_element)
-            output.append(cle.pull_zyx(neighborized_element)[0])
+            neighborized_non_nan_element = cle.undefined_to_zero(element, neighborized_non_nan_element)
+            output.append(cle.pull(neighborized_non_nan_element)[0])
 
             #neighborized_element = cle.minimum_of_touching_neighbors(element, neighborhood, neighborized_element)
             #output.append(cle.pull_zyx(neighborized_element)[0])

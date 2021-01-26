@@ -1,7 +1,7 @@
 
 from magicgui import magicgui
 from napari.layers import Image
-from napari_pyclesperanto_assistant import AssistantGUI
+from napari_pyclesperanto_assistant import Assistant
 import pyclesperanto_prototype as cle
 
 @magicgui(
@@ -18,7 +18,7 @@ def _crop(input1: Image, start_x : int = 0, start_y:int = 0, start_z: int = 0, w
     if input1:
         print("crop")
         # execute operation
-        cle_input = cle.push_zyx(input1.data)
+        cle_input = cle.push(input1.data)
 
         output = cle.create([depth, height, width])
         cle.crop(cle_input, output,
@@ -32,12 +32,11 @@ def _crop(input1: Image, start_x : int = 0, start_y:int = 0, start_z: int = 0, w
         max_intensity = cle.maximum_of_all_pixels(output)
         if max_intensity == 0:
             max_intensity = 1 # prevent division by zero in vispy
-        output = cle.pull_zyx(output)
+        output = cle.pull(output)
 
         # show result in napari
-        if (_crop.initial_call):
+        if (_crop.call_count == 0):
             _crop.self.viewer.add_image(output, colormap=input1.colormap)
-            _crop.initial_call = False
         else:
             _crop.self.layer.data = output
             _crop.self.layer.name = "Result of crop"
@@ -46,5 +45,5 @@ def _crop(input1: Image, start_x : int = 0, start_y:int = 0, start_z: int = 0, w
 
 
 
-def attach_crop_dock_widget(assistant: AssistantGUI):
+def attach_crop_dock_widget(assistant: Assistant):
     assistant.add_button("Crop", _crop)
