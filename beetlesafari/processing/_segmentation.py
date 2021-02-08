@@ -6,6 +6,9 @@ def segmentation(image, cells : cle.Image = None, sigma_noise_removal : float = 
     from ._spot_detection import spot_detection
     from ._cell_segmentation import cell_segmentation
 
+    import time
+    start_time = time.time()
+
     stopwatch()
 
     background_subtracted = None
@@ -23,6 +26,7 @@ def segmentation(image, cells : cle.Image = None, sigma_noise_removal : float = 
     cells = cell_segmentation(spots, cells, number_of_dilations=14, number_of_erosions=8)
 
     stopwatch("cell segmentation")
+    print("Segmentation took " + str(time.time() - start_time) + " s")
 
     return cells, spots
 

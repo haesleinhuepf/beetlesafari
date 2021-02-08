@@ -59,5 +59,6 @@ def neighborized_feature_vectors(
 
     import numpy as np
     data = np.asarray(output).T
+    data = data.astype('float32')
 
     return data

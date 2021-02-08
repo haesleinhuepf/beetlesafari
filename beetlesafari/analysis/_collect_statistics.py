@@ -1,4 +1,6 @@
 import pyclesperanto_prototype as cle
+from numpy import double
+import numpy as np
 
 def collect_statistics(
         image : cle.Image,
@@ -35,6 +37,7 @@ def collect_statistics(
         # stopwatch("dist matrix")
 
         if neighbor_statistics:
+            print("neigh")
             # topology measurements
             dict['nearest_neighbor_distance_n1'] = _cle_to_1d_np(cle.average_distance_of_n_closest_points(distance_matrix, n=1))
 
@@ -58,10 +61,11 @@ def collect_statistics(
 
             # stopwatch("avg dst 5")
         if shape_statistics:
+            print("shape")
             dict['minimum_distance_of_touching_neighbors'] = _cle_to_1d_np(cle.minimum_distance_of_touching_neighbors(distance_matrix, touch_matrix))
             dict['maximum_distance_of_touching_neighbors'] = _cle_to_1d_np(cle.maximum_distance_of_touching_neighbors(distance_matrix, touch_matrix))
             dict['average_distance_of_touching_neighbors'] = _cle_to_1d_np(cle.average_distance_of_touching_neighbors(distance_matrix, touch_matrix))
-            dict['aspect_ratio_between_touching_neighbors'] = _regionprops_to_1d_np(dict['maximum_distance_of_touching_neighbors'] / dict['minimum_distance_of_touching_neighbors'])
+            # dict['aspect_ratio_between_touching_neighbors'] = _regionprops_to_1d_np(dict['maximum_distance_of_touching_neighbors'] / dict['minimum_distance_of_touching_neighbors'])
 
     if delta_statistics or intensity_statistics or shape_statistics:
         # stopwatch("B")
@@ -70,19 +74,25 @@ def collect_statistics(
         regionprops = cle.statistics_of_background_and_labelled_pixels(image, cells)
 
         if intensity_statistics:
+            print("intens")
+
             dict['mean_intensity'] = _regionprops_to_1d_np(regionprops['mean_intensity'])
             dict['standard_deviation_intensity'] = _regionprops_to_1d_np(regionprops['standard_deviation_intensity'])
-            dict['minimum_intensity'] = _regionprops_to_1d_np(regionprops['min_intensity'])
-            dict['maximum_intensity'] = _regionprops_to_1d_np(regionprops['max_intensity'])
+            #dict['minimum_intensity'] = _regionprops_to_1d_np(regionprops['min_intensity'])
+            #dict['maximum_intensity'] = _regionprops_to_1d_np(regionprops['max_intensity'])
 
         # intensity measurements related to second timepoint
         if delta_statistics and subsequent_image is not None:
+            print("delta")
+
             # determine local changes
             squared_difference_image = cle.squared_difference(image, subsequent_image)
             regionprops2 = cle.statistics_of_background_and_labelled_pixels(squared_difference_image, cells)
             dict['mean_squared_error_intensity'] = _regionprops_to_1d_np(regionprops2['mean_intensity'])
 
         if shape_statistics:
+            print("shape2")
+
             dict['size'] = _regionprops_to_1d_np(regionprops['area'])
 
             # shape measurements
@@ -95,6 +105,8 @@ def collect_statistics(
 
         # measurements related to second timepoint
         if delta_statistics and subsequent_cells is not None:
+            print("delta2")
+
             # measure distance to closest cell centroid in the other image
             other_pointlist = cle.centroids_of_labels(subsequent_cells)
             displacement_matrix = cle.generate_distance_matrix(centroids, other_pointlist)
@@ -113,11 +125,10 @@ def _cle_to_1d_np(image : cle.Image):
     # workaround
     image = cle.undefined_to_zero(image)
 
-    result = cle.pull_zyx(image)
-    return result[0]
+    result = cle.pull(image)
+    return np.asarray(result[0]).astype(double)
 
 def _regionprops_to_1d_np(values : list):
-    import numpy as np
     import math
     values = [v if not math.isnan(v) or math.isinf(v) else 0 for v in values]
-    return np.asarray(values)
+    return np.asarray(values).astype(double)

@@ -8,8 +8,11 @@ from ._clearcontrol_dataset import ClearControlDataset
     layout='vertical',
 )
 def _clearcontrol_loader(directory : str = "C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR", dataset_name : str = 'C0opticsprefused', hours : int = 0, minutes : int = 0, seconds : int = 0):
+    import time
+    start_time = time.time()
+
     if directory is None:
-        # we have to do it like this becasue the assistant hands over None at the first call
+        # we have to do it like this because the assistant hands over None at the first call
         directory = "C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR"
 
     cc_dataset : ClearControlDataset = ClearControlDataset(directory)
@@ -29,9 +32,10 @@ def _clearcontrol_loader(directory : str = "C:/structure/data/2019-12-17-16-54-3
     max_intensity = cle.maximum_of_all_pixels(output)
 
     output = cle.pull(output)
-
+    print("Loading took " + str(time.time() - start_time) + " s")
 
     # show result in napari
+    start_time = time.time()
     if (_clearcontrol_loader.call_count == 0):
         _clearcontrol_loader.self.viewer.add_image(output)
     else:
@@ -39,6 +43,7 @@ def _clearcontrol_loader(directory : str = "C:/structure/data/2019-12-17-16-54-3
         _clearcontrol_loader.self.layer.name = "CCds" + str(index)
         _clearcontrol_loader.self.layer.contrast_limits = (min_intensity, max_intensity)
         _clearcontrol_loader.self.layer.metadata['filename'] = filename
+    print("Interop took " + str(time.time() - start_time) + " s")
 
 
 from napari_pyclesperanto_assistant import Assistant

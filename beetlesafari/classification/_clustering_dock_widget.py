@@ -1,5 +1,5 @@
 from magicgui import magicgui
-from napari.layers import Image
+from napari.layers import Image, Labels
 
 from beetlesafari import stopwatch
 
@@ -10,7 +10,7 @@ from beetlesafari import stopwatch
     algorithm={'choices':['k_means_clustering', 'gaussian_mixture_model']}
 )
 def __clustering_dock_widget(input1 : Image = None,
-                                input2 : Image = None,
+                                input2 : Labels = None,
                                 algorithm : str = 'k_means_clustering',
                                 num_classes : int = 2,
                                 train : bool = False,
@@ -20,23 +20,30 @@ def __clustering_dock_widget(input1 : Image = None,
                                 delta_statistics: bool = True,
                                 ):
 
+    import numpy as np
+    import beetlesafari as bs
+    import pyclesperanto_prototype as cle
+
     if input1 is None or input2 is None:
         print("no data")
+        if (__clustering_dock_widget.call_count == 0):
+            temp = cle.create([1,1,1])
+            __clustering_dock_widget.self.viewer.add_labels(temp)
         return
 
     if not train and __clustering_dock_widget.model is None:
         print("no model leaving")
+        if (__clustering_dock_widget.call_count == 0):
+            temp = cle.create_like(cle.push(input1.data))
+            __clustering_dock_widget.self.viewer.add_labels(temp)
         return
 
-    import numpy as np
-    import beetlesafari as bs
-    import pyclesperanto_prototype as cle
     import pyopencl
 
     #try:
     if True:
-        intensity = cle.push_zyx(input1.data)
-        labels = cle.push_zyx(input2.data)
+        intensity = cle.push(input1.data)
+        labels = cle.push(input2.data)
 
         stopwatch()
         touch_matrix, neighbors_of_neighbors, neighbors_of_neighbors_of_neighbors = bs.neighbors(labels)
@@ -45,9 +52,16 @@ def __clustering_dock_widget(input1 : Image = None,
         centroids = cle.centroids_of_labels(labels)
         stopwatch("determine centroids")
 
+        #print(centroids)
+
+        mesh = cle.create_like(intensity)
+        cle.set(mesh, 0)
+        mesh = cle.touch_matrix_to_mesh(centroids, touch_matrix, mesh)
+        stopwatch("mesh")
+
         # ---------------------------------
         # Measurements
-        meausrements = bs.collect_statistics(
+        measurements = bs.collect_statistics(
             intensity, labels,
             neighbor_statistics=neighbor_statistics,
             intensity_statistics=intensity_statistics,
@@ -60,8 +74,12 @@ def __clustering_dock_widget(input1 : Image = None,
         )
         stopwatch("collect statistics")
 
-        data = bs.neighborized_feature_vectors(meausrements, [touch_matrix, neighbors_of_neighbors])
+        data = bs.neighborized_feature_vectors(measurements, [touch_matrix, neighbors_of_neighbors])
                                                               #, neighbors_of_neighbors_of_neighbors])
+
+        #print("Type:", data.dtype)
+        #data = data.astype('double')
+        #print("Type:", data.dtype)
 
         if train:
             if algorithm == 'k_means_clustering':
@@ -71,12 +89,10 @@ def __clustering_dock_widget(input1 : Image = None,
 
             bs.stopwatch("train")
 
-        mesh = cle.create_like(intensity)
-        cle.set(mesh, 0)
-        mesh = cle.touch_matrix_to_mesh(centroids, touch_matrix, mesh)
-        stopwatch("mesh")
 
         prediction = __clustering_dock_widget.model.predict(data)
+
+        bs.stopwatch("predict")
 
         prediction_vector = cle.push(np.asarray([prediction]) + 1)
         cle.set_column(prediction_vector, 0, 0)
@@ -86,11 +102,14 @@ def __clustering_dock_widget(input1 : Image = None,
 
         prediction_map = cle.replace_intensities(labels, prediction_vector)
 
+        bs.stopwatch("post-proc")
+
         # pred_stats = cle.statistics_of_labelled_pixels(None, prediction_map, measure_shape=False)
         # pred_size = cle.push_regionprops_column(pred_stats, 'area')
         # cle.set_column(pred_size, 0, 0)
 
         # prediction_map = cle.replace_intensities(prediction_map, pred_size)
+
         prediction_map = cle.multiply_images(prediction_map, mesh)
 
         # show result in napari
