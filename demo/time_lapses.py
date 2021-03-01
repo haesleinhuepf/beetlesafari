@@ -2,23 +2,30 @@ import numpy as np
 import pyclesperanto_prototype as cle
 import beetlesafari as bs
 
-delta_time_in_seconds = bs.minutes_to_seconds(5)
 
-start_time_in_seconds = bs.hours_to_seconds(0)
-end_time_in_seconds = bs.hours_to_seconds(48)
+#cc_dataset = bs.ClearControlDataset('C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR/')
+#output_dir = "C:/structure/temp/lund/"
+#sigma_noise_removal = 2
+#sigma_background_removal = 17
+#spot_detection_threshold = 25
+#delta_time_in_seconds = bs.minutes_to_seconds(5)
+#start_time_in_seconds = bs.hours_to_seconds(0)
+#end_time_in_seconds = bs.hours_to_seconds(48)
 
-cc_dataset = bs.ClearControlDataset('C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR/')
-
+cc_dataset = bs.ClearControlDataset('C:/structure/data/2019-11-13-12-26-11-88-Wolgast_Tribolium_nGFP_TMR/')
+output_dir = "C:/structure/temp/wolgast/"
 sigma_noise_removal = 2
 sigma_background_removal = 17
 spot_detection_threshold = 25
+delta_time_in_seconds = bs.minutes_to_seconds(60)
+start_time_in_seconds = bs.hours_to_seconds(0)
+end_time_in_seconds = bs.hours_to_seconds(20)
 
 
-n_timepoints = 2
+n_timepoints = 5
 
-num_class_selection = [2, 4, 5, 6, 7, 10]
+num_class_selection = [7]
 
-output_dir = "C:/structure/temp/lund/"
 
 
 print(cle.select_device("RTX"))
@@ -37,8 +44,8 @@ mesh = None
 
 for num_classes in num_class_selection:
 
-    #model = bs.k_means_clustering(data, num_classes)
-    model = bs.gaussian_mixture_model(data, num_classes)
+    model = bs.k_means_clustering(data, num_classes)
+    #model = bs.gaussian_mixture_model(data, num_classes)
     #model = bs.spectral_clustering(data, num_classes)
 
     for t in np.arange(start_time_in_seconds, end_time_in_seconds, delta_time_in_seconds):
