@@ -1,6 +1,6 @@
 import pyclesperanto_prototype as cle
 
-def cell_segmentation(input : cle.Image, output : cle.Image, number_of_dilations : int = 10, number_of_erosions : int = 6):
+def cell_segmentation(input : cle.Image, output : cle.Image, number_of_dilations : int = 10, number_of_erosions : int = 6, prevent_stick_to_border : bool = False):
     if output is None:
         output = cle.create_like(input)
 
@@ -15,17 +15,19 @@ def cell_segmentation(input : cle.Image, output : cle.Image, number_of_dilations
         cle.onlyzero_overwrite_maximum_box(temp_flip, temp_flag, temp_flop)
         cle.onlyzero_overwrite_maximum_diamond(temp_flop, temp_flag, temp_flip)
 
+
     width = temp_flip.shape[2]
     height = temp_flip.shape[1]
     depth = temp_flip.shape[0]
 
     # prevent labels sticking to the image border
-    cle.set_column(temp_flip, 0, 0)
-    cle.set_column(temp_flip, width-1, 0)
-    cle.set_row(temp_flip, 0, 0)
-    cle.set_row(temp_flip, height-1, 0)
-    cle.set_plane(temp_flip, 0, 0)
-    cle.set_plane(temp_flip, depth-1, 0)
+    if prevent_stick_to_border:
+        cle.set_column(temp_flip, 0, 0)
+        cle.set_column(temp_flip, width-1, 0)
+        cle.set_row(temp_flip, 0, 0)
+        cle.set_row(temp_flip, height-1, 0)
+        cle.set_plane(temp_flip, 0, 0)
+        cle.set_plane(temp_flip, depth-1, 0)
 
     # shrink labels a bit again
     cle.greater_constant(temp_flip, output, constant=0)
