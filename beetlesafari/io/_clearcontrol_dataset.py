@@ -72,7 +72,7 @@ class ClearControlDataset:
         voxel_size = self.get_voxel_size_zyx(index)
 
         resampled_image = cle.resample(input_image, resampled_image, factor_x=voxel_size[2], factor_y=voxel_size[1],
-                                       factor_z=voxel_size[0])
+                                       factor_z=voxel_size[0], linear_interpolation=True)
 
         return resampled_image
 

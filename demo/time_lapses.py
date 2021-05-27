@@ -22,9 +22,9 @@ start_time_in_seconds = bs.hours_to_seconds(0)
 end_time_in_seconds = bs.hours_to_seconds(20)
 
 
-n_timepoints = 5
+n_timepoints = 2
 
-num_class_selection = [7]
+num_class_selection = [4]
 
 
 
