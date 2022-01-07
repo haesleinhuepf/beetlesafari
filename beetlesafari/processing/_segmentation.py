@@ -35,13 +35,7 @@ from magicgui import magicgui
 from napari.layers import Image
 
 
-@magicgui(
-    auto_call=True,
-    layout='vertical',
-    sigma_noise_removal={'minimum': 0, 'maximum': 1000},
-    sigma_background_removal={'minimum': 0, 'maximum': 1000},
-    spot_detection_threshold={'minimum': 0, 'maximum': 100000},
-)
+
 def _segmentation(
         input1: Image = None,
         sigma_noise_removal: float = 1,

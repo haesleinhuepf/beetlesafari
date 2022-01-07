@@ -4,11 +4,7 @@ from napari.layers import Image, Labels
 from beetlesafari import stopwatch
 
 
-@magicgui(
-    auto_call=True,
-    layout='vertical',
-    algorithm={'choices':['k_means_clustering', 'gaussian_mixture_model']}
-)
+
 def __clustering_dock_widget(input1 : Image = None,
                                 input2 : Labels = None,
                                 algorithm : str = 'k_means_clustering',
