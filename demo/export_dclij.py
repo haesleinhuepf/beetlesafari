@@ -25,13 +25,14 @@ for i, t in enumerate(np.arange(start_time_in_seconds, end_time_in_seconds, delt
     index = cc_dataset.get_index_after_time(t)
     print("Time (h), index", bs.seconds_to_hours(t), index)
     image = cc_dataset.get_image(index)
+    acquisition_time = cc_dataset.times_in_seconds[index]
 
     from skimage.io import imsave
     imsave(output_dir + "lund_i" + (str(i).zfill(6)) + "_oi_" + (str(index).zfill(6)) + ".tif", image)
 
-    table['time_in_s'].append(t)
+    table['time_in_s'].append(acquisition_time)
+    table['index'].append(i)
     table['original_index'].append(index)
-    table['index'].append(index)
 
 import pandas as pd
 pd.DataFrame(table).to_csv(output_dir + "metadata.csv")
