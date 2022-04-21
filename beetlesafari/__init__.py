@@ -1,7 +1,7 @@
 from .io import *
 from .utils import *
 
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 
 from napari_plugin_engine import napari_hook_implementation
 
