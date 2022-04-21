@@ -5,7 +5,7 @@ from ._clearcontrol_dataset import ClearControlDataset
 from napari_tools_menu import register_function
 import napari
 
-@register_function(menu="File IO > Load ClearControl dataset (beetlesafari)")
+@register_function(menu="File Import/Export > Load ClearControl dataset (beetlesafari)")
 def _clearcontrol_loader(directory : str = "C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR", dataset_name : str = 'C0opticsprefused', hours : int = 0, minutes : int = 0, seconds : int = 0) -> napari.types.ImageData:
     import time
     start_time = time.time()
