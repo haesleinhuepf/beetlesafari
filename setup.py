@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="beetlesafari",
-    version="0.3.0",
+    version="0.3.1",
     author="Robert Haase",
     author_email="robert.haase@tu-dresden.de",
     description="A napari plugin for loading and working with light sheet imaging data of developing embryos acquired using ClearControl, e.g. _Tribolium castaneum_.",
