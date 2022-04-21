@@ -5,20 +5,29 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="beetlesafari",
-    version="0.2.0",
+    version="0.3.0",
     author="haesleinhuepf",
     author_email="robert.haase@tu-dresden.de",
-    description="A library for working with light sheet imaging data of developing embryos, e.g. _Tribolium castaneum_.",
+    description="A napari plugin for loading and working with light sheet imaging data of developing embryos acquired using ClearControl, e.g. _Tribolium castaneum_.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/haesleinhuepf/beetlesafari",
     packages=setuptools.find_packages(),
     include_package_data=True,
-    install_requires=["numpy", "pyopencl", "toolz", "scikit-image", "requests", "pyclesperanto-prototype==0.9.1", "napari==0.4.8", "magicgui", "dask", "cachetools", "napari_pyclesperanto_assistant==0.9.1", "scikit-learn"],
+    install_requires=["numpy", "pyopencl", "toolz", "scikit-image", "requests", "pyclesperanto-prototype", "napari", "magicgui", "dask", "cachetools", "napari-tools-menu"],
     python_requires='>=3.7',
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
+        "Framework :: napari",
+        "Intended Audience :: Science/Research",
+        "Development Status :: 3 - Alpha",
     ],
+    entry_points={
+        "napari.plugin": [
+            "beetlesafari = beetlesafari",
+        ],
+    },
 )
+

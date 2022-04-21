@@ -2,12 +2,11 @@ import datetime
 
 from magicgui import magicgui
 from ._clearcontrol_dataset import ClearControlDataset
+from napari_tools_menu import register_function
+import napari
 
-@magicgui(
-    auto_call=True,
-    layout='vertical',
-)
-def _clearcontrol_loader(directory : str = "C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR", dataset_name : str = 'C0opticsprefused', hours : int = 0, minutes : int = 0, seconds : int = 0):
+@register_function(menu="File IO > Load ClearControl dataset (beetlesafari)")
+def _clearcontrol_loader(directory : str = "C:/structure/data/2019-12-17-16-54-37-81-Lund_Tribolium_nGFP_TMR", dataset_name : str = 'C0opticsprefused', hours : int = 0, minutes : int = 0, seconds : int = 0) -> napari.types.ImageData:
     import time
     start_time = time.time()
 
@@ -35,16 +34,7 @@ def _clearcontrol_loader(directory : str = "C:/structure/data/2019-12-17-16-54-3
     print("Loading took " + str(time.time() - start_time) + " s")
 
     # show result in napari
-    start_time = time.time()
-    if (_clearcontrol_loader.call_count == 0):
-        _clearcontrol_loader.self.viewer.add_image(output)
-    else:
-        _clearcontrol_loader.self.layer.data = output
-        _clearcontrol_loader.self.layer.name = "CCds" + str(index)
-        _clearcontrol_loader.self.layer.contrast_limits = (min_intensity, max_intensity)
-        _clearcontrol_loader.self.layer.metadata['filename'] = filename
-    print("Interop took " + str(time.time() - start_time) + " s")
-
+    return output
 
 from napari_pyclesperanto_assistant import Assistant
 

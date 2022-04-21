@@ -68,10 +68,10 @@ class ClearControlDataset:
     def get_resampled_image(self, index = None, time_in_seconds = None, resampled_image : cle.Image = None, linear_interpolation : bool = True):
         index, time_in_seconds = self._handle_index_and_time(index, time_in_seconds)
 
-        input_image = cle.push_zyx(self.get_image(index))
+        input_image = cle.push(self.get_image(index))
         voxel_size = self.get_voxel_size_zyx(index)
 
-        resampled_image = cle.resample(input_image, resampled_image, factor_x=voxel_size[2], factor_y=voxel_size[1],
+        resampled_image = cle.scale(input_image, resampled_image, factor_x=voxel_size[2], factor_y=voxel_size[1],
                                        factor_z=voxel_size[0], linear_interpolation=linear_interpolation)
 
         return resampled_image

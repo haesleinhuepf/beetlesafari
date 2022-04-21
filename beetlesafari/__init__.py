@@ -1,8 +1,12 @@
-from .clesperanto import *
 from .io import *
-from .processing import *
 from .utils import *
-from .analysis import *
-from .classification import *
 
-__version__ = "0.1.0"
+__version__ = "0.3.0"
+
+from napari_plugin_engine import napari_hook_implementation
+
+
+@napari_hook_implementation
+def napari_experimental_provide_dock_widget():
+
+    return [attach_clearcontrol_dock_widget]
