@@ -3,12 +3,12 @@ import pyclesperanto_prototype as cle
 import beetlesafari as bs
 
 
-cc_dataset = bs.ClearControlDataset('D:/IMAGING/archive_data_good/2020-02-06-16-10-18-21-Montafon_Tribolium_nGFP_TMR/')
-output_dir = "C:/structure/temp/montafon/"
+cc_dataset = bs.ClearControlDataset('D:/IMAGING/archive_data_good/2019-11-15-13-35-17-87-Heide_Tribolium_nGFP_TMR/')
+output_dir = "C:/structure/temp/heide/"
 
-delta_time_in_seconds = bs.minutes_to_seconds(10)
-start_time_in_seconds = bs.hours_to_seconds(7)
-end_time_in_seconds = bs.hours_to_seconds(16)
+delta_time_in_seconds = bs.minutes_to_seconds(20)
+start_time_in_seconds = bs.hours_to_seconds(12)
+end_time_in_seconds = bs.hours_to_seconds(27)
 
 table = {'time_in_s':[],
          'original_index':[],
