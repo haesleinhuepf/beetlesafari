@@ -36,8 +36,3 @@ def _clearcontrol_loader(directory : str = "C:/structure/data/2019-12-17-16-54-3
     # show result in napari
     return output
 
-from napari_pyclesperanto_assistant import Assistant
-
-def attach_clearcontrol_dock_widget(assistant : Assistant):
-
-    assistant.add_button("ClearControl loader", _clearcontrol_loader)
